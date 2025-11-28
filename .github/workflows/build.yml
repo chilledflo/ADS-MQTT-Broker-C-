@@ -102,7 +102,7 @@ jobs:
         cmake -B build \
           -DCMAKE_TOOLCHAIN_FILE=~/vcpkg/scripts/buildsystems/vcpkg.cmake \
           -DCMAKE_BUILD_TYPE=Release \
-          -DTWINCAT_ADS_ROOT=${{ github.workspace }}/lib
+          -DBUILD_WITHOUT_ADS=ON
 
     - name: Build
       run: |

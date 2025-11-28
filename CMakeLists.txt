@@ -31,14 +31,31 @@ if(NOT BUILD_WITHOUT_ADS)
         endif()
     endif()
     
-    find_library(ADS_LIBRARY 
-        NAMES TcAdsDll
-        PATHS "${TWINCAT_ADS_ROOT}" "${TWINCAT_ADS_ROOT}/Lib/x64"
-        REQUIRED
-    )
-    add_compile_definitions(HAS_TWINCAT_ADS)
+    if(WIN32)
+        # Windows: TcAdsDll
+        find_library(ADS_LIBRARY 
+            NAMES TcAdsDll
+            PATHS "${TWINCAT_ADS_ROOT}" "${TWINCAT_ADS_ROOT}/Lib/x64"
+            REQUIRED
+        )
+        add_compile_definitions(HAS_TWINCAT_ADS)
+    else()
+        # Linux: Beckhoff ADS Library (from vcpkg or system)
+        find_library(ADS_LIBRARY 
+            NAMES adslib ads
+            PATHS /usr/local/lib /usr/lib
+            REQUIRED
+        )
+        find_path(ADS_INCLUDE_DIR 
+            NAMES AdsLib.h
+            PATHS /usr/local/include /usr/include
+            REQUIRED
+        )
+        include_directories(${ADS_INCLUDE_DIR})
+        add_compile_definitions(HAS_ADSLIB)
+    endif()
 else()
-    message(STATUS "Building without TwinCAT ADS support (CI/CD mode)")
+    message(STATUS "Building without ADS support (CI/CD mode)")
 endif()
 
 # Paho MQTT C++
@@ -90,17 +107,36 @@ endif()
 
 # Link libraries
 if(NOT BUILD_WITHOUT_ADS)
-    target_link_libraries(ads-realtime-bridge
-        PRIVATE
-        ${ADS_LIBRARY}
-        PahoMqttCpp::paho-mqttpp3
-        ws2_32  # Windows Sockets
-    )
+    if(WIN32)
+        target_link_libraries(ads-realtime-bridge
+            PRIVATE
+            ${ADS_LIBRARY}
+            PahoMqttCpp::paho-mqttpp3
+            ws2_32  # Windows Sockets
+        )
+    else()
+        # Linux: ADS Library + pthread
+        target_link_libraries(ads-realtime-bridge
+            PRIVATE
+            ${ADS_LIBRARY}
+            PahoMqttCpp::paho-mqttpp3
+            pthread
+        )
+    endif()
 else()
-    target_link_libraries(ads-realtime-bridge
-        PRIVATE
-        PahoMqttCpp::paho-mqttpp3
-        ws2_32  # Windows Sockets
+    # Build without ADS support
+    if(WIN32)
+        target_link_libraries(ads-realtime-bridge
+            PRIVATE
+            PahoMqttCpp::paho-mqttpp3
+            ws2_32
+        )
+    else()
+        target_link_libraries(ads-realtime-bridge
+            PRIVATE
+            PahoMqttCpp::paho-mqttpp3
+            pthread
+        )
     )
 endif()
 
