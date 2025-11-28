@@ -1,4 +1,4 @@
-name: Build ADS Realtime C++
+﻿name: Build ADS Realtime C++
 
 on:
   push:
@@ -10,17 +10,17 @@ on:
 jobs:
   build-windows:
     runs-on: windows-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Setup CMake
       uses: lukka/get-cmake@latest
-      
+
     - name: Setup MSVC
       uses: microsoft/setup-msbuild@v2
-      
+
     - name: Setup vcpkg
       shell: powershell
       run: |
@@ -28,23 +28,24 @@ jobs:
         git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
         cd C:\vcpkg
         .\bootstrap-vcpkg.bat
-        
+
     - name: Install dependencies
       shell: powershell
       run: |
-        C:\vcpkg\vcpkg.exe install paho-mqttpp3:x64-windows --triplet x64-windows
-        
+        cd ${{ github.workspace }}
+        C:\vcpkg\vcpkg.exe install --triplet x64-windows
+
     - name: Configure CMake
       run: |
         cmake -B build -G "Visual Studio 17 2022" -A x64 `
           -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" `
           -DCMAKE_BUILD_TYPE=Release `
           -DTWINCAT_ADS_ROOT="${{ github.workspace }}/lib"
-          
+
     - name: Build
       run: |
         cmake --build build --config Release -j
-        
+
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -53,7 +54,7 @@ jobs:
           build/Release/*.exe
           build/Release/*.dll
         retention-days: 30
-        
+
     - name: Create Release (on tag)
       if: startsWith(github.ref, 'refs/tags/v')
       uses: softprops/action-gh-release@v1
