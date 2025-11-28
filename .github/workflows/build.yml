@@ -22,24 +22,17 @@ jobs:
       uses: lukka/run-vcpkg@v11
       with:
         vcpkgGitCommitId: 'a42af01b72c28a8e1d7b48107b33e4f286a55ef6'
+        doNotCache: false
         
     - name: Setup MSVC
       uses: microsoft/setup-msbuild@v2
       
-    - name: Cache vcpkg packages
-      uses: actions/cache@v4
+    - name: Install dependencies with run-vcpkg
+      uses: lukka/run-vcpkg@v11
       with:
-        path: |
-          ${{ env.VCPKG_ROOT }}/installed
-          ${{ env.VCPKG_ROOT }}/packages
-          ${{ env.VCPKG_ROOT }}/downloads
-        key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}-paho
-        restore-keys: |
-          ${{ runner.os }}-vcpkg-
-      
-    - name: Install dependencies
-      run: |
-        vcpkg install paho-mqttpp3:x64-windows --triplet x64-windows
+        vcpkgGitCommitId: 'a42af01b72c28a8e1d7b48107b33e4f286a55ef6'
+        runVcpkgInstall: true
+        vcpkgJsonGlob: '**/vcpkg.json'
         
     - name: Configure CMake
       run: |

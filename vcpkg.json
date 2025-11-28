@@ -1,0 +1,9 @@
+{
+  "name": "ads-realtime-bridge",
+  "version": "1.0.0",
+  "description": "Hard real-time ADS to MQTT Bridge",
+  "dependencies": [
+    "paho-mqttpp3"
+  ],
+  "builtin-baseline": "a42af01b72c28a8e1d7b48107b33e4f286a55ef6"
+}
