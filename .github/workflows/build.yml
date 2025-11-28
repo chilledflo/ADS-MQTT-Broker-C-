@@ -110,6 +110,10 @@ jobs:
 
     - name: Configure CMake
       run: |
+        rm -rf build
+        ls -la
+        echo "=== Checking CMakeLists.txt ==="
+        head -n 5 CMakeLists.txt
         cmake -B build \
           -DCMAKE_TOOLCHAIN_FILE=~/vcpkg/scripts/buildsystems/vcpkg.cmake \
           -DCMAKE_BUILD_TYPE=Release
