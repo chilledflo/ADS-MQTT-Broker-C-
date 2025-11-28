@@ -1,12 +1,12 @@
-cmake_minimum_required(VERSION 3.20)
+﻿cmake_minimum_required(VERSION 3.20)
 project(ADS-Realtime-CPP VERSION 1.0.0 LANGUAGES CXX)
 
-# C++17 für harte Echtzeit-Features
+# C++17 fÃ¼r harte Echtzeit-Features
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Optimization flags für minimale Latenz
+# Optimization flags fÃ¼r minimale Latenz
 if(MSVC)
     add_compile_options(/O2 /GL /arch:AVX2 /fp:fast)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LTCG /OPT:REF /OPT:ICF")
@@ -14,13 +14,13 @@ else()
     add_compile_options(-O3 -march=native -mtune=native -flto -ffast-math)
 endif()
 
-# Option für Build ohne TwinCAT ADS (z.B. für CI/CD)
+# Option fÃ¼r Build ohne TwinCAT ADS (z.B. fÃ¼r CI/CD)
 option(BUILD_WITHOUT_ADS "Build without TwinCAT ADS support (CI/CD mode)" OFF)
 
 if(NOT BUILD_WITHOUT_ADS)
-    # TwinCAT ADS Library - Prüfe lokale lib/ zuerst, dann System
+    # TwinCAT ADS Library - PrÃ¼fe lokale lib/ zuerst, dann System
     if(NOT DEFINED TWINCAT_ADS_ROOT)
-        # Versuche zuerst lokales lib-Verzeichnis (für GitHub Actions)
+        # Versuche zuerst lokales lib-Verzeichnis (fÃ¼r GitHub Actions)
         if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/lib/TcAdsDll.lib")
             set(TWINCAT_ADS_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/lib")
             message(STATUS "Using bundled TwinCAT ADS library from: ${TWINCAT_ADS_ROOT}")
@@ -58,16 +58,17 @@ set(SOURCES
     src/main.cpp
     src/ads_realtime_engine.cpp
     src/mqtt_publisher.cpp
-    src/variable_manager.cpp
-    src/performance_monitor.cpp
 )
 
 set(HEADERS
     include/ads_realtime_engine.hpp
     include/mqtt_publisher.hpp
-    include/variable_manager.hpp
-    include/performance_monitor.hpp
     include/realtime_config.hpp
+    include/binary_payload.hpp
+    include/variable_batch.hpp
+    include/shared_memory.hpp
+    include/payload_compression.hpp
+    include/compressed_payload.hpp
 )
 
 # Main executable
