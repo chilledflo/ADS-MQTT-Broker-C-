@@ -18,26 +18,25 @@ jobs:
     - name: Setup CMake
       uses: lukka/get-cmake@latest
       
-    - name: Setup vcpkg
-      uses: lukka/run-vcpkg@v11
-      with:
-        vcpkgGitCommitId: 'a42af01b72c28a8e1d7b48107b33e4f286a55ef6'
-        doNotCache: false
-        
     - name: Setup MSVC
       uses: microsoft/setup-msbuild@v2
       
-    - name: Install dependencies with run-vcpkg
-      uses: lukka/run-vcpkg@v11
-      with:
-        vcpkgGitCommitId: 'a42af01b72c28a8e1d7b48107b33e4f286a55ef6'
-        runVcpkgInstall: true
-        vcpkgJsonGlob: '**/vcpkg.json'
+    - name: Setup vcpkg
+      shell: powershell
+      run: |
+        git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
+        cd C:\vcpkg
+        .\bootstrap-vcpkg.bat
+        
+    - name: Install dependencies
+      shell: powershell
+      run: |
+        C:\vcpkg\vcpkg.exe install paho-mqttpp3:x64-windows --triplet x64-windows
         
     - name: Configure CMake
       run: |
         cmake -B build -G "Visual Studio 17 2022" -A x64 `
-          -DCMAKE_TOOLCHAIN_FILE="${env:VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" `
+          -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" `
           -DCMAKE_BUILD_TYPE=Release `
           -DTWINCAT_ADS_ROOT="${{ github.workspace }}/lib"
           
