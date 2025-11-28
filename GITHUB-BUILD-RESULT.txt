@@ -1,0 +1,6 @@
+﻿Run: Build ADS Realtime C++
+Run URL: https://github.com/chilledflo/ADS-MQTT-Broker-C-/actions/runs/19773414048
+Status: completed
+Conclusion: failure
+Duration: 4m 43s
+Artifacts: (visit run URL to download)
