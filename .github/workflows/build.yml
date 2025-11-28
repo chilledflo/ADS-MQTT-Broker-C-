@@ -101,6 +101,8 @@ jobs:
         sed -i '1i cmake_minimum_required(VERSION 3.10)' CMakeLists.txt
         sed -i '2i project(AdsLib)' CMakeLists.txt
         sed -i '3i find_package(Threads REQUIRED)' CMakeLists.txt
+        # Fix missing CONFIG_DEFAULT_LOGLEVEL definition
+        sed -i 's/CONFIG_DEFAULT_LOGLEVEL/3/g' Log.cpp
         mkdir build && cd build
         cmake ..
         make -j$(nproc)
