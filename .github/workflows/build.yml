@@ -97,8 +97,11 @@ jobs:
         cd /tmp
         git clone https://github.com/Beckhoff/ADS.git
         cd ADS/AdsLib
+        # Patch CMakeLists.txt to add required cmake_minimum_required
+        sed -i '1i cmake_minimum_required(VERSION 3.10)' CMakeLists.txt
+        sed -i '2i project(AdsLib)' CMakeLists.txt
         mkdir build && cd build
-        cmake .. -Wno-dev -Wno-error=dev -DCMAKE_SUPPRESS_DEVELOPER_WARNINGS=1
+        cmake ..
         make -j$(nproc)
         sudo make install
         sudo ldconfig
