@@ -1,5 +1,10 @@
 #pragma once
 
+// Windows max/min Makro deaktivieren BEVOR andere Headers
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
 #include "realtime_config.hpp"
 #include <mqtt/async_client.h>
 #include <string>

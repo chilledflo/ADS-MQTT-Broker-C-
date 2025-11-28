@@ -1,3 +1,8 @@
+// Windows max/min Makro deaktivieren BEVOR andere Headers
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
 #include "mqtt_publisher.hpp"
 #include <iostream>
 

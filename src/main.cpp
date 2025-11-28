@@ -1,3 +1,8 @@
+// Windows max/min Makro deaktivieren BEVOR andere Headers
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
 #include "ads_realtime_engine.hpp"
 #include "mqtt_publisher.hpp"
 #include "realtime_config.hpp"

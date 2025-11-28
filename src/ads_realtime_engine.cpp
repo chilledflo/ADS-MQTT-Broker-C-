@@ -4,6 +4,22 @@
 #include <numeric>
 #include <cstring>
 
+// Windows max/min Makro-Konflikte verhindern
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
+// ADS API Definitionen die in älteren TcAdsAPI.h fehlen könnten
+#ifndef ADSIGRP_SYM_HNDBYNAME
+#define ADSIGRP_SYM_HNDBYNAME 0xF003
+#endif
+#ifndef ADSIGRP_SYM_VALBYHND
+#define ADSIGRP_SYM_VALBYHND 0xF005
+#endif
+#ifndef ADSIGRP_SYM_INFOBYNAMEEX
+#define ADSIGRP_SYM_INFOBYNAMEEX 0xF040
+#endif
+
 namespace ads_realtime {
 
 AdsRealtimeEngine::AdsRealtimeEngine(const RealtimeConfig& config)
@@ -36,13 +52,15 @@ bool AdsRealtimeEngine::connect() {
         return false;
     }
 
-    // AMS NetId des PLC auflösen
+    // AMS NetId manuell setzen (AdsGetNetIdForHostName nicht in allen TcAdsAPI verfügbar)
     AmsNetId netId;
-    if (AdsGetNetIdForHostName(config_.ads_target_ip.c_str(), &netId) != 0) {
-        std::cerr << "[ADS RT] ERROR: Cannot resolve AMS NetId for " 
-                  << config_.ads_target_ip << "\n";
-        return false;
-    }
+    // Für lokale Verbindung: 127.0.0.1.1.1 (Standard TwinCAT)
+    netId.b[0] = 127;
+    netId.b[1] = 0;
+    netId.b[2] = 0;
+    netId.b[3] = 1;
+    netId.b[4] = 1;
+    netId.b[5] = 1;
 
     // AMS Adresse setzen
     ams_addr_.netId = netId;
@@ -68,7 +86,7 @@ bool AdsRealtimeEngine::add_variable(
     var_handle->callback = std::move(callback);
 
     // Symbol-Handle für Variable abrufen
-    uint32_t bytes_read = 0;
+    unsigned long bytes_read = 0;
     long result = AdsSyncReadWriteReqEx2(
         ads_port_,
         &ams_addr_,
@@ -76,8 +94,8 @@ bool AdsRealtimeEngine::add_variable(
         0,
         sizeof(var_handle->handle),
         &var_handle->handle,
-        variable_name.length(),
-        variable_name.c_str(),
+        static_cast<unsigned long>(variable_name.length()),
+        const_cast<char*>(variable_name.c_str()),
         &bytes_read
     );
 
@@ -89,6 +107,7 @@ bool AdsRealtimeEngine::add_variable(
 
     // Variablen-Info abrufen (Datentyp, Größe)
     AdsSymbolEntry symbol_entry{};
+    unsigned long bytes_read2 = 0;
     result = AdsSyncReadReqEx2(
         ads_port_,
         &ams_addr_,
@@ -96,7 +115,7 @@ bool AdsRealtimeEngine::add_variable(
         0,
         sizeof(symbol_entry),
         &symbol_entry,
-        &bytes_read
+        &bytes_read2
     );
 
     if (result != 0) {
@@ -113,15 +132,15 @@ bool AdsRealtimeEngine::add_variable(
     attrib.nMaxDelay = 0;  // Keine Verzögerung
     attrib.nCycleTime = config_.notification_cycle_us / 1000;  // µs -> ms
 
-    uint32_t notification_handle = 0;
+    unsigned long notification_handle = 0;
     result = AdsSyncAddDeviceNotificationReqEx(
         ads_port_,
         &ams_addr_,
         ADSIGRP_SYM_VALBYHND,
         var_handle->handle,
         &attrib,
-        &AdsRealtimeEngine::ads_notification_callback,
-        reinterpret_cast<uint32_t>(var_handle.get()),
+        reinterpret_cast<PAdsNotificationFuncEx>(&AdsRealtimeEngine::ads_notification_callback),
+        reinterpret_cast<unsigned long>(var_handle.get()),
         &notification_handle
     );
 

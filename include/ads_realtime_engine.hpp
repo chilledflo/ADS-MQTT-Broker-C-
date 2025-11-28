@@ -66,7 +66,7 @@ public:
 private:
     struct VariableHandle {
         uint32_t handle = 0;
-        uint32_t notification_handle = 0;
+        unsigned long notification_handle = 0;  // MUSS unsigned long sein f\u00fcr ADS API
         NotificationCallback callback;
         std::string name;
         size_t data_size = 0;
