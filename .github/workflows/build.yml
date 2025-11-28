@@ -24,6 +24,7 @@ jobs:
     - name: Setup vcpkg
       shell: powershell
       run: |
+        if (Test-Path C:\vcpkg) { Remove-Item -Recurse -Force C:\vcpkg }
         git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
         cd C:\vcpkg
         .\bootstrap-vcpkg.bat
