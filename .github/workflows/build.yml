@@ -106,7 +106,10 @@ jobs:
         mkdir build && cd build
         cmake ..
         make -j$(nproc)
-        sudo make install
+        # Manual install since CMakeLists.txt has no install rules
+        sudo cp libads.a /usr/local/lib/
+        sudo mkdir -p /usr/local/include/AdsLib
+        sudo cp -r ../AdsLib.h ../AdsNotificationOOI.h ../AdsDef.h ../standalone/*.h /usr/local/include/AdsLib/
         sudo ldconfig
 
     - name: Install Paho MQTT
