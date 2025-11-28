@@ -1,63 +1,92 @@
-# ADS-Realtime-CPP
+# ADS-Realtime-CPP v2.0
+
+[![Build](https://github.com/chilledflo/ADS-MQTT-Broker-C-/actions/workflows/build.yml/badge.svg)](https://github.com/chilledflo/ADS-MQTT-Broker-C-/actions)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-lightgrey.svg)](README.md)
 
 **Hard Real-Time MQTT-ADS Bridge mit garantierter Latenz <1ms**
 
-Hochperformante C++ Implementierung für TwinCAT ADS Device Notifications mit deterministischer Echtzeitverarbeitung.
+Hochperformante C++ Implementierung für TwinCAT ADS Device Notifications mit deterministischer Echtzeitverarbeitung. Produktions-ready System für kritische Automatisierungsanwendungen.
 
-## 🎯 Features
+## 🎯 Core Features
 
-- ⚡ **Harte Echtzeit**: Garantierte Latenz <1ms
+- ⚡ **Hard Real-Time**: Garantierte Latenz <1ms
 - 🚀 **Ultra-Fast**: 100µs Notification Cycle (10kHz)
 - 🔒 **Lock-Free**: Zero-Copy MQTT Publishing
-- 📊 **Performance Monitoring**: Latenz-Tracking mit Percentile-Statistiken
-- 🎛️ **Windows Optimized**: TIME_CRITICAL Thread Priority, CPU Affinity
-- 📡 **ADS Device Notifications**: Event-basiert, keine Polling-Latenz
+- 📊 **Performance Monitoring**: Latenz-Tracking mit P50/P95/P99 Statistiken
+- 🎛️ **Multi-Platform**: Windows (RTSS) + Linux (RT_PREEMPT)
+- 📡 **Event-Driven**: ADS Device Notifications (kein Polling!)
+- 🗜️ **Kompression**: RLE/Dictionary mit <1µs/KB
+- 📦 **Binary Payload**: 60-80% kleiner als JSON
 
 ## 📋 Systemanforderungen
 
-- **OS**: Windows 10/11 (für TwinCAT ADS)
-- **Compiler**: MSVC 2019+ oder MinGW-w64 mit C++17
+### Minimal
+- **OS**: Windows 10/11 oder Linux (Ubuntu 20.04+)
+- **Compiler**: MSVC 2019+ (Windows) oder GCC 9+ (Linux) mit C++17
 - **CMake**: 3.20+
-- **TwinCAT**: ADS DLL (C:\TwinCAT\ADS Api\TcAdsDll)
-- **MQTT**: Paho MQTT C++ Library
-- **PLC**: Beckhoff TwinCAT Runtime
+- **TwinCAT**: ADS DLL bundled in `lib/` directory
+- **MQTT**: Paho MQTT C++ (via vcpkg)
+
+### Optional für Hard Real-Time
+- **Windows RTSS**: Kithara RealTime Suite oder INtime RTOS
+- **Linux RT**: PREEMPT_RT Kernel Patch
+- **Hardware**: Dedizierte CPU Cores empfohlen
 
 ## 🚀 Quick Start
 
-### 1. Dependencies installieren
+### Windows
 
-**TwinCAT ADS Library**:
 ```powershell
-# Bereits vorhanden bei TwinCAT Installation
-# Pfad: C:\TwinCAT\ADS Api\TcAdsDll
-```
+# 1. Repository klonen
+git clone https://github.com/chilledflo/ADS-MQTT-Broker-C-.git
+cd ADS-MQTT-Broker-C-
 
-**Paho MQTT C++**:
-```powershell
-# vcpkg (empfohlen)
-vcpkg install paho-mqttpp3:x64-windows
+# 2. vcpkg installieren (falls nicht vorhanden)
+git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
+C:\vcpkg\bootstrap-vcpkg.bat
 
-# Oder CMake Build:
-git clone https://github.com/eclipse/paho.mqtt.cpp
-cd paho.mqtt.cpp
-cmake -B build -DCMAKE_BUILD_TYPE=Release
+# 3. Dependencies installieren
+C:\vcpkg\vcpkg install paho-mqttpp3:x64-windows
+
+# 4. Build
+cmake -B build -G "Visual Studio 17 2022" ^
+  -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake ^
+  -DCMAKE_BUILD_TYPE=Release
 cmake --build build --config Release
-cmake --install build
-```
 
-### 2. Projekt bauen
-
-```powershell
-cd C:\ADS-Realtime-CPP
-cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=[vcpkg-root]/scripts/buildsystems/vcpkg.cmake
-cmake --build build --config Release
-```
-
-### 3. Starten
-
-```powershell
+# 5. Starten
 .\build\Release\ads-realtime-bridge.exe
 ```
+
+### Linux
+
+```bash
+# 1. Dependencies installieren
+sudo apt update
+sudo apt install build-essential cmake git pkg-config libssl-dev
+
+# 2. vcpkg
+git clone https://github.com/Microsoft/vcpkg.git ~/vcpkg
+~/vcpkg/bootstrap-vcpkg.sh
+~/vcpkg/vcpkg install paho-mqttpp3:x64-linux
+
+# 3. Build
+cmake -B build \
+  -DCMAKE_TOOLCHAIN_FILE=~/vcpkg/scripts/buildsystems/vcpkg.cmake \
+  -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j$(nproc)
+
+# 4. Starten
+./build/ads-realtime-bridge
+```
+
+### GitHub Actions CI/CD
+
+Automatische Builds für Windows und Linux bei jedem Push:
+- ✅ Windows (MSVC, x64)
+- ✅ Linux (GCC, Ubuntu latest)
+- Artifacts: 30 Tage verfügbar
 
 ## ⚙️ Konfiguration
 
@@ -177,16 +206,46 @@ Automatische Statistiken alle 5 Sekunden:
 - Lock-Free Data Structures
 - Zero-Copy Memory Operations
 
-## 🆚 Vergleich zu Node.js Version
+## 🆚 Vergleich: Node.js vs C++
 
-| Feature | Node.js | C++ |
-|---------|---------|-----|
-| Min Latency | ~2-5ms | ~200µs |
-| Max Latency | ~10-20ms | <1ms |
-| Determinismus | Nein | Ja |
-| Thread Priority | Standard | TIME_CRITICAL |
-| Memory Management | GC | Manual/Smart Pointers |
-| Hard Real-Time | ❌ | ✅ |
+### Node.js Version (ADS-MQTT-Broker)
+**Repository**: [github.com/chilledflo/ADS-MQTT-Broker](https://github.com/chilledflo/ADS-MQTT-Broker)
+
+| Feature | Node.js | C++ (diese Version) |
+|---------|---------|---------------------|
+| **Latenz (Min)** | ~5-10ms | ~200µs |
+| **Latenz (Max)** | ~20-50ms | <1ms |
+| **Throughput** | ~100 Hz | 10kHz+ |
+| **Determinismus** | ❌ Nein | ✅ Ja |
+| **ADS Methode** | Polling (100ms) | Notifications (µs) |
+| **Thread Priority** | Standard | TIME_CRITICAL / RT |
+| **Memory** | GC (unpredictable) | Manual (deterministic) |
+| **Web Dashboard** | ✅ Ja (Socket.IO) | ❌ Nein |
+| **REST API** | ✅ Express | ❌ Nein |
+| **MQTT Broker** | ✅ Eingebaut (Aedes) | ❌ Nur Client |
+| **Multi-PLC** | ✅ Ja | ❌ Single PLC |
+| **Symbol Discovery** | ✅ Automatisch | ❌ Manuell |
+| **Binary Payload** | ❌ JSON only | ✅ 60-80% kleiner |
+| **Compression** | ❌ Nein | ✅ RLE/Dictionary |
+| **Shared Memory** | ❌ Nein | ✅ Lock-Free IPC |
+| **RTSS Support** | ❌ Nein | ✅ Windows |
+| **RT_PREEMPT** | ❌ Nein | ✅ Linux |
+
+### Wann was verwenden?
+
+**Node.js für:**
+- 🔍 Debugging & Monitoring
+- 🧪 Prototyping & Development
+- 📊 Dashboard-Visualisierung
+- 🔧 Mehrere PLCs gleichzeitig
+- ⚙️ Flexible Konfiguration
+
+**C++ für:**
+- ⚡ Hard Real-Time (<1ms)
+- 🏭 Produktions-Maschinen
+- 📈 High-Frequency (10kHz+)
+- 💪 CPU-intensive Tasks
+- 🔒 Deterministisches Verhalten
 
 ## ✅ Neue Features (v2.0)
 
@@ -284,11 +343,62 @@ GRUB_CMDLINE_LINUX="isolcpus=1,2,3 nohz_full=1,2,3 rcu_nocbs=1,2,3"
 sudo chrt -f 99 ./ads-realtime-bridge
 ```
 
+## 📁 Projekt-Struktur
+
+```
+ADS-Realtime-CPP/
+├── src/                           # Source Files
+│   ├── main.cpp                   # Entry Point
+│   ├── ads_realtime_engine.cpp    # ADS Engine Implementation
+│   └── mqtt_publisher.cpp         # MQTT Publisher
+├── include/                       # Header Files
+│   ├── ads_realtime_engine.hpp    # ADS Engine
+│   ├── mqtt_publisher.hpp         # MQTT Publisher
+│   ├── realtime_config.hpp        # Configuration
+│   ├── variable_batch.hpp         # Multi-Variable Batching (v2.0)
+│   ├── binary_payload.hpp         # Binary Payload Format (v2.0)
+│   ├── shared_memory.hpp          # Shared Memory IPC (v2.0)
+│   ├── payload_compression.hpp    # Compression Algorithms (v2.0)
+│   ├── compressed_payload.hpp     # Compression Integration (v2.0)
+│   ├── rtss_integration.hpp       # Windows RTSS Support (v2.0)
+│   └── linux_rt_preempt.hpp       # Linux RT Support (v2.0)
+├── examples/                      # Example Applications
+│   ├── example.cpp                # Basic Example
+│   ├── compression_example.cpp    # Compression Demo
+│   ├── rtss_example.cpp           # Windows RTSS Demo
+│   └── linux_rt_example.cpp       # Linux RT Demo
+├── lib/                           # TwinCAT ADS Library (bundled)
+│   ├── TcAdsDll.dll
+│   ├── TcAdsDll.lib
+│   └── Include/
+├── .github/workflows/             # CI/CD Pipeline
+│   └── build.yml                  # Windows + Linux Build
+├── CMakeLists.txt                 # Build Configuration
+├── vcpkg.json                     # Dependencies (Paho MQTT)
+└── README.md                      # This file
+```
+
+## 🔗 Links
+
+- **GitHub (C++)**: https://github.com/chilledflo/ADS-MQTT-Broker-C-
+- **GitHub (Node.js)**: https://github.com/chilledflo/ADS-MQTT-Broker
+- **CI/CD**: https://github.com/chilledflo/ADS-MQTT-Broker-C-/actions
+- **Beckhoff TwinCAT**: https://www.beckhoff.com/twincat
+- **Paho MQTT**: https://github.com/eclipse/paho.mqtt.cpp
+
 ## 📄 Lizenz
 
-MIT License - siehe LICENSE
+MIT License - siehe [LICENSE](LICENSE)
 
-## 👨‍💻 Autor
+## 🤝 Contributing
 
-ADS-Realtime-CPP - Hard Real-Time System
+Contributions sind willkommen! Bitte erstelle einen Pull Request oder öffne ein Issue.
+
+## 📞 Support
+
+Bei Fragen oder Problemen bitte ein GitHub Issue erstellen.
+
+---
+
+**ADS-Realtime-CPP v2.0** - Production-Ready Hard Real-Time System 🚀
 
