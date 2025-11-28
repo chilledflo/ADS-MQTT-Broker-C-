@@ -235,10 +235,54 @@ Schnelle Compression für Batch Payloads:
 - **Integration**: Nahtlos mit Binary Payload Format
 - **Bandwidth**: 40-70% Bandbreiten-Ersparnis
 
-## 📝 TODO
+#### RTSS Integration (`include/rtss_integration.hpp`)
+Windows Real-Time SubSystem Support:
+- **Kithara/INtime RTOS**: Sub-Microsecond Determinismus
+- **TIME_CRITICAL+**: Höhere Priorität als normale Windows Threads
+- **Dedicated CPU Cores**: CPU Affinity für RTSS Tasks
+- **Lock-Free Memory Pool**: RTSS-kompatible Memory Management
+- **Hardware Timer**: Sub-100ns Präzision
+- **Example**: `examples/rtss_example.cpp`
 
-- [ ] RTSS Integration (Kithara/INtime) - Benötigt spezialisierte RTOS-Hardware
-- [ ] Linux RT_PREEMPT Support - Benötigt Linux mit RT_PREEMPT Kernel
+#### Linux RT_PREEMPT Support (`include/linux_rt_preempt.hpp`)
+Linux Hard Real-Time mit PREEMPT_RT Kernel:
+- **SCHED_FIFO/RR/DEADLINE**: RT Scheduling Policies
+- **Priority 1-99**: Höchste Linux RT Priorität
+- **Memory Locking**: mlockall() für no page faults
+- **clock_nanosleep**: Nanosecond-Präzision
+- **CPU Isolation**: isolcpus Kernel Parameter
+- **Cyclictest Integration**: Latency Measurement
+- **Example**: `examples/linux_rt_example.cpp`
+
+## 📝 Setup für Production RTOS
+
+### Windows RTSS:
+```powershell
+# Kithara RealTime Suite installieren
+# Download: https://www.kithara.com/
+# Oder INtime RTOS: https://www.tenasys.com/
+
+# Nach Installation: HAS_RTSS_SDK in CMakeLists.txt definieren
+cmake -B build -DHAS_RTSS_SDK=ON
+```
+
+### Linux RT_PREEMPT:
+```bash
+# RT Kernel installieren
+sudo apt install linux-image-rt-amd64
+
+# RT Limits setzen (/etc/security/limits.conf)
+* soft rtprio 99
+* hard rtprio 99
+* soft memlock unlimited
+* hard memlock unlimited
+
+# CPU Isolation (GRUB: /etc/default/grub)
+GRUB_CMDLINE_LINUX="isolcpus=1,2,3 nohz_full=1,2,3 rcu_nocbs=1,2,3"
+
+# Mit RT Priorität starten
+sudo chrt -f 99 ./ads-realtime-bridge
+```
 
 ## 📄 Lizenz
 

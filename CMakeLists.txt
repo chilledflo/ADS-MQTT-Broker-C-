@@ -69,10 +69,24 @@ set(HEADERS
     include/shared_memory.hpp
     include/payload_compression.hpp
     include/compressed_payload.hpp
+    include/rtss_integration.hpp
+    include/linux_rt_preempt.hpp
 )
 
 # Main executable
 add_executable(ads-realtime-bridge ${SOURCES} ${HEADERS})
+
+# Optional: RTSS Example (Windows only)
+if(WIN32)
+    add_executable(rtss_example examples/rtss_example.cpp)
+    target_link_libraries(rtss_example PRIVATE)
+endif()
+
+# Optional: Linux RT_PREEMPT Example (Linux only)
+if(UNIX AND NOT APPLE)
+    add_executable(linux_rt_example examples/linux_rt_example.cpp)
+    target_link_libraries(linux_rt_example PRIVATE pthread)
+endif()
 
 # Link libraries
 if(NOT BUILD_WITHOUT_ADS)
