@@ -14,21 +14,33 @@ else()
     add_compile_options(-O3 -march=native -mtune=native -flto -ffast-math)
 endif()
 
-# TwinCAT ADS Library (Windows)
-find_library(ADS_LIBRARY 
-    NAMES TcAdsDll
-    PATHS "C:/TwinCAT/ADS Api/TcAdsDll/x64/lib"
-    REQUIRED
-)
+# Option für Build ohne TwinCAT ADS (z.B. für CI/CD)
+option(BUILD_WITHOUT_ADS "Build without TwinCAT ADS support (CI/CD mode)" OFF)
 
-# Mosquitto C++ Library für MQTT
+if(NOT BUILD_WITHOUT_ADS)
+    # TwinCAT ADS Library (Windows) - Korrigierte Pfade
+    set(TWINCAT_ADS_ROOT "C:/Program Files (x86)/Beckhoff/TwinCAT/AdsApi/TcAdsDll")
+    find_library(ADS_LIBRARY 
+        NAMES TcAdsDll
+        PATHS "${TWINCAT_ADS_ROOT}/Lib/x64"
+        REQUIRED
+    )
+    add_compile_definitions(HAS_TWINCAT_ADS)
+else()
+    message(STATUS "Building without TwinCAT ADS support (CI/CD mode)")
+endif()
+
+# Paho MQTT C++
 find_package(PahoMqttCpp REQUIRED)
 
 # Include directories
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    "C:/TwinCAT/ADS Api/TcAdsDll/Include"
 )
+
+if(NOT BUILD_WITHOUT_ADS)
+    include_directories("${TWINCAT_ADS_ROOT}/Include")
+endif()
 
 # Source files
 set(SOURCES
@@ -51,12 +63,20 @@ set(HEADERS
 add_executable(ads-realtime-bridge ${SOURCES} ${HEADERS})
 
 # Link libraries
-target_link_libraries(ads-realtime-bridge
-    PRIVATE
-    ${ADS_LIBRARY}
-    PahoMqttCpp::paho-mqttpp3
-    ws2_32  # Windows Sockets
-)
+if(NOT BUILD_WITHOUT_ADS)
+    target_link_libraries(ads-realtime-bridge
+        PRIVATE
+        ${ADS_LIBRARY}
+        PahoMqttCpp::paho-mqttpp3
+        ws2_32  # Windows Sockets
+    )
+else()
+    target_link_libraries(ads-realtime-bridge
+        PRIVATE
+        PahoMqttCpp::paho-mqttpp3
+        ws2_32  # Windows Sockets
+    )
+endif()
 
 # Set high priority at runtime
 set_target_properties(ads-realtime-bridge PROPERTIES
