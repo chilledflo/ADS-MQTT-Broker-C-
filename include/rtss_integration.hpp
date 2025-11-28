@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <functional>
 #include <string>
+#include <atomic>
 
 // RTSS (Real-Time SubSystem) Integration für Kithara/INtime
 // Benötigt: Kithara RealTime Suite oder INtime RTOS Installation

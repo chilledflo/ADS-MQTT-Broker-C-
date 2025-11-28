@@ -8,7 +8,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Optimization flags fÃ¼r minimale Latenz
 if(MSVC)
-    add_compile_options(/O2 /GL /arch:AVX2 /fp:fast)
+    add_compile_options(/O2 /GL /arch:AVX2 /fp:fast /utf-8)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LTCG /OPT:REF /OPT:ICF")
 else()
     add_compile_options(-O3 -march=native -mtune=native -flto -ffast-math)
