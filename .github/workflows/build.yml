@@ -92,6 +92,17 @@ jobs:
         git clone https://github.com/Microsoft/vcpkg.git ~/vcpkg
         ~/vcpkg/bootstrap-vcpkg.sh
 
+    - name: Install Beckhoff ADS Library
+      run: |
+        cd /tmp
+        git clone https://github.com/Beckhoff/ADS.git
+        cd ADS/AdsLib
+        mkdir build && cd build
+        cmake ..
+        make -j$(nproc)
+        sudo make install
+        sudo ldconfig
+
     - name: Install Paho MQTT
       run: |
         cd ${{ github.workspace }}
@@ -101,8 +112,7 @@ jobs:
       run: |
         cmake -B build \
           -DCMAKE_TOOLCHAIN_FILE=~/vcpkg/scripts/buildsystems/vcpkg.cmake \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DBUILD_WITHOUT_ADS=ON
+          -DCMAKE_BUILD_TYPE=Release
 
     - name: Build
       run: |
