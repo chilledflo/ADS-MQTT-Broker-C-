@@ -75,6 +75,7 @@ set(SOURCES
     src/main.cpp
     src/ads_realtime_engine.cpp
     src/mqtt_publisher.cpp
+    src/plc_discovery.cpp
 )
 
 set(HEADERS
@@ -88,6 +89,7 @@ set(HEADERS
     include/compressed_payload.hpp
     include/rtss_integration.hpp
     include/linux_rt_preempt.hpp
+    include/plc_discovery.hpp
 )
 
 # Main executable
@@ -137,7 +139,7 @@ else()
             PahoMqttCpp::paho-mqttpp3
             pthread
         )
-    )
+    endif()
 endif()
 
 # Set high priority at runtime
