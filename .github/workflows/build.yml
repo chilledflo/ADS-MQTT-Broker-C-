@@ -98,7 +98,7 @@ jobs:
         git clone https://github.com/Beckhoff/ADS.git
         cd ADS/AdsLib
         mkdir build && cd build
-        cmake .. -Wno-dev
+        cmake .. -Wno-dev -Wno-error=dev -DCMAKE_SUPPRESS_DEVELOPER_WARNINGS=1
         make -j$(nproc)
         sudo make install
         sudo ldconfig
