@@ -1,0 +1,145 @@
+﻿name: Build ADS Realtime C++
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup CMake
+      uses: lukka/get-cmake@latest
+
+    - name: Setup MSVC
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Setup vcpkg
+      shell: powershell
+      run: |
+        if (Test-Path C:\vcpkg) { Remove-Item -Recurse -Force C:\vcpkg }
+        git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
+        cd C:\vcpkg
+        .\bootstrap-vcpkg.bat
+
+    - name: Install dependencies
+      shell: powershell
+      run: |
+        cd ${{ github.workspace }}
+        C:\vcpkg\vcpkg.exe install --triplet x64-windows
+
+    - name: Configure CMake
+      run: |
+        cmake -B build -G "Visual Studio 17 2022" -A x64 `
+          -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" `
+          -DCMAKE_BUILD_TYPE=Release `
+          -DTWINCAT_ADS_ROOT="${{ github.workspace }}/lib"
+
+    - name: Build
+      run: |
+        cmake --build build --config Release -j
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ads-realtime-bridge-windows
+        path: |
+          build/Release/*.exe
+          build/Release/*.dll
+        retention-days: 30
+
+    - name: Create Release (on tag)
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          build/Release/ads-realtime-bridge.exe
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup CMake
+      uses: lukka/get-cmake@latest
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          g++ \
+          cmake \
+          git \
+          pkg-config \
+          libssl-dev
+
+    - name: Setup vcpkg
+      run: |
+        git clone https://github.com/Microsoft/vcpkg.git ~/vcpkg
+        ~/vcpkg/bootstrap-vcpkg.sh
+
+    - name: Install Beckhoff ADS Library
+      run: |
+        cd /tmp
+        git clone https://github.com/Beckhoff/ADS.git
+        cd ADS/AdsLib
+        mkdir build && cd build
+        cmake ..
+        make -j$(nproc)
+        sudo make install
+        sudo ldconfig
+
+    - name: Install Paho MQTT
+      run: |
+        cd ${{ github.workspace }}
+        ~/vcpkg/vcpkg install --triplet x64-linux
+
+    - name: Configure CMake
+      run: |
+        cmake -B build \
+          -DCMAKE_TOOLCHAIN_FILE=~/vcpkg/scripts/buildsystems/vcpkg.cmake \
+          -DCMAKE_BUILD_TYPE=Release
+
+    - name: Build
+      run: |
+        cmake --build build -j$(nproc)
+
+    - name: Run Tests (if available)
+      run: |
+        if [ -f build/tests ]; then
+          ./build/tests
+        fi
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ads-realtime-bridge-linux
+        path: |
+          build/ads-realtime-bridge
+          build/examples/*
+        retention-days: 30
+
+    - name: Create Release (on tag)
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          build/ads-realtime-bridge
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
