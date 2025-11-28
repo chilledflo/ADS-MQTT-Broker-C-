@@ -18,11 +18,22 @@ endif()
 option(BUILD_WITHOUT_ADS "Build without TwinCAT ADS support (CI/CD mode)" OFF)
 
 if(NOT BUILD_WITHOUT_ADS)
-    # TwinCAT ADS Library (Windows) - Korrigierte Pfade
-    set(TWINCAT_ADS_ROOT "C:/Program Files (x86)/Beckhoff/TwinCAT/AdsApi/TcAdsDll")
+    # TwinCAT ADS Library - Prüfe lokale lib/ zuerst, dann System
+    if(NOT DEFINED TWINCAT_ADS_ROOT)
+        # Versuche zuerst lokales lib-Verzeichnis (für GitHub Actions)
+        if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/lib/TcAdsDll.lib")
+            set(TWINCAT_ADS_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/lib")
+            message(STATUS "Using bundled TwinCAT ADS library from: ${TWINCAT_ADS_ROOT}")
+        else()
+            # Fallback auf System-Installation
+            set(TWINCAT_ADS_ROOT "C:/Program Files (x86)/Beckhoff/TwinCAT/AdsApi/TcAdsDll")
+            message(STATUS "Using system TwinCAT ADS library from: ${TWINCAT_ADS_ROOT}")
+        endif()
+    endif()
+    
     find_library(ADS_LIBRARY 
         NAMES TcAdsDll
-        PATHS "${TWINCAT_ADS_ROOT}/Lib/x64"
+        PATHS "${TWINCAT_ADS_ROOT}" "${TWINCAT_ADS_ROOT}/Lib/x64"
         REQUIRED
     )
     add_compile_definitions(HAS_TWINCAT_ADS)
