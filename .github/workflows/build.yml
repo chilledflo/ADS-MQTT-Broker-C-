@@ -98,7 +98,7 @@ jobs:
         git clone https://github.com/Beckhoff/ADS.git
         cd ADS/AdsLib
         mkdir build && cd build
-        cmake ..
+        cmake .. -Wno-dev
         make -j$(nproc)
         sudo make install
         sudo ldconfig
