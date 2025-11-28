@@ -41,14 +41,14 @@ if(NOT BUILD_WITHOUT_ADS)
         add_compile_definitions(HAS_TWINCAT_ADS)
     else()
         # Linux: Beckhoff ADS Library (from vcpkg or system)
-        find_library(ADS_LIBRARY 
-            NAMES adslib ads
+        find_library(ADS_LIBRARY
+            NAMES AdsLib adslib ads
             PATHS /usr/local/lib /usr/lib
             REQUIRED
         )
-        find_path(ADS_INCLUDE_DIR 
+        find_path(ADS_INCLUDE_DIR
             NAMES AdsLib.h
-            PATHS /usr/local/include /usr/include
+            PATHS /usr/local/include /usr/include /usr/local/include/AdsLib
             REQUIRED
         )
         include_directories(${ADS_INCLUDE_DIR})
@@ -155,3 +155,5 @@ install(TARGETS ads-realtime-bridge
 
 # Documentation
 add_subdirectory(docs)
+
+
