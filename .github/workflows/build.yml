@@ -109,7 +109,8 @@ jobs:
         # Manual install since CMakeLists.txt has no install rules
         sudo cp libads.a /usr/local/lib/
         sudo mkdir -p /usr/local/include/AdsLib
-        sudo cp -r ../AdsLib.h ../AdsNotificationOOI.h ../AdsDef.h ../standalone/*.h /usr/local/include/AdsLib/
+        sudo cp ../AdsLib.h ../AdsNotificationOOI.h ../AdsDef.h /usr/local/include/AdsLib/
+        sudo cp ../standalone/*.h /usr/local/include/AdsLib/ 2>/dev/null || true
         sudo ldconfig
 
     - name: Install Paho MQTT
