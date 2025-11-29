@@ -59,7 +59,6 @@ int main(int argc, char* argv[]) {
 #else
     std::cout << "[SYSTEM] Thread-Priorität: Standard (Linux)\n";
 #endif
-#endif
 
 #ifdef _WIN32
     // ADS Engine initialisieren (nur Windows RTSS)
