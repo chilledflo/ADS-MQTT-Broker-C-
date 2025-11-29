@@ -156,6 +156,15 @@ int main(int argc, char* argv[]) {
     if (monitor_thread.joinable()) {
         monitor_thread.join();
     }
+#else
+    // Linux: Kein RTSS Engine
+    while (g_running.load()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+    
+    std::cout << "\n[MAIN] Fahre System herunter...\n";
+    mqtt_publisher.disconnect();
+#endif
 
     std::cout << "[MAIN] Beendet.\n";
     return 0;
