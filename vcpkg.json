@@ -1,11 +1,12 @@
-﻿{
-  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
-  "name": "ads-realtime-cpp",
-  "version": "1.0.0",
-  "description": "High-performance ADS to MQTT bridge in C++",
-  "dependencies": [
-    "paho-mqttpp3",
-    "nlohmann-json",
-    "spdlog"
-  ]
+{
+    "$schema":  "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+    "name":  "ads-realtime-cpp",
+    "version":  "1.0.0",
+    "description":  "High-performance ADS to MQTT bridge in C++",
+    "dependencies":  [
+                         "paho-mqttpp3",
+                         "nlohmann-json",
+                         "spdlog",
+                         "fmt"
+                     ]
 }
