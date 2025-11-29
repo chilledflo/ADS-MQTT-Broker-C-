@@ -73,7 +73,7 @@ endif()
 # Source files
 set(SOURCES
     src/main.cpp
-    src/ads_realtime_engine.cpp
+    $<$<PLATFORM_ID:Windows>:src/ads_realtime_engine.cpp>
     src/mqtt_publisher.cpp
     src/plc_discovery.cpp
 )

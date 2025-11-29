@@ -1,4 +1,4 @@
-ï»¿#include "plc_discovery.hpp"
+#include "plc_discovery.hpp"
 #include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
 #include <chrono>
@@ -34,7 +34,7 @@ bool PlcDiscovery::addRoute(const PlcRoute& route) {
     spdlog::info("Adding route: {} ({}) - {}:{}", 
         route.name, route.amsNetId, route.ipAddress, route.port);
     
-    // Route zur Liste hinzufÃ¼gen
+    // Route zur Liste hinzufügen
     // TODO: Implementierung mit ADS-Library
     
     return true;
@@ -58,7 +58,7 @@ std::vector<PlcRoute> PlcDiscovery::getRoutes() const {
     std::lock_guard<std::mutex> lock(mutex_);
 
     std::vector<PlcRoute> routes;
-    // TODO: Implementierung - Alle Routes zurÃ¼ckgeben
+    // TODO: Implementierung - Alle Routes zurückgeben
 
     return routes;
 }
@@ -91,9 +91,9 @@ std::vector<SymbolInfo> PlcDiscovery::discoverSymbols(const std::string& amsNetI
     
     std::vector<SymbolInfo> symbols;
 
-    // TODO: ADS Symbol Upload durchfÃ¼hren
+    // TODO: ADS Symbol Upload durchführen
     // 1. ReadSymbolInfo
-    // 2. ReadSymbolByName fÃ¼r alle Symbole
+    // 2. ReadSymbolByName für alle Symbole
     // 3. Parse Symbol-Tabelle
 
     symbols_[amsNetId] = symbols;
@@ -108,7 +108,7 @@ bool PlcDiscovery::subscribeToSymbol(const std::string& amsNetId, const SymbolIn
     spdlog::info("Subscribing to symbol: {} on PLC {}", symbol.name, amsNetId);
     
     // TODO: ADS Notification erstellen
-    // AddDeviceNotification fÃ¼r zyklisches Lesen
+    // AddDeviceNotification für zyklisches Lesen
 
     return true;
 }
@@ -118,7 +118,7 @@ void PlcDiscovery::unsubscribeFromSymbol(const std::string& amsNetId, const std:
 
     spdlog::info("Unsubscribing from symbol: {} on PLC {}", symbolName, amsNetId);
     
-    // TODO: ADS Notification lÃ¶schen
+    // TODO: ADS Notification löschen
     // DeleteDeviceNotification
 }
 
@@ -128,7 +128,7 @@ std::vector<PlcRoute> PlcDiscovery::scanNetwork(const std::string& subnet) {
     std::vector<PlcRoute> foundPlcs;
 
     // Parse Subnet (z.B. 192.168.0.0/24)
-    // FÃ¼r jeden IP-Bereich:
+    // Für jeden IP-Bereich:
     //   - Ping auf Port 48898 (ADS)
     //   - Wenn erfolgreich: Route erstellen
 
@@ -197,7 +197,7 @@ void PlcDiscovery::autoDiscoveryLoop(uint32_t intervalSeconds) {
             spdlog::error("Error in auto-discovery: {}", e.what());
         }
 
-        // Warte bis zum nÃ¤chsten Scan
+        // Warte bis zum nächsten Scan
         for (uint32_t i = 0; i < intervalSeconds && autoDiscoveryRunning_; ++i) {
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
