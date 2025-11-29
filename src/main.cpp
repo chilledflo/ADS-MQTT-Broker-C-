@@ -3,7 +3,9 @@
 #define NOMINMAX
 #endif
 
+#ifdef _WIN32
 #include "ads_realtime_engine.hpp"
+#endif
 #include "mqtt_publisher.hpp"
 #include "realtime_config.hpp"
 #include <iostream>
