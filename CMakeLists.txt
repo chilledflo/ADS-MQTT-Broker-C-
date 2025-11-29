@@ -106,7 +106,6 @@ if(UNIX AND NOT APPLE)
     add_executable(linux_rt_example examples/linux_rt_example.cpp)
     target_link_libraries(linux_rt_example PRIVATE pthread)
 endif()
-endif()
 
 # Link libraries
 if(NOT BUILD_WITHOUT_ADS)
