@@ -102,16 +102,15 @@ if(WIN32)
 endif()
 
 # Optional: Linux RT_PREEMPT Example (Linux only)
-if(UNIX AND NOT APPLE)
-    add_executable(linux_rt_example examples/linux_rt_example.cpp)
-    target_link_libraries(linux_rt_example PRIVATE pthread)
-endif()
+#if(UNIX AND NOT APPLE)  # Disabled - platform-specific issues`n#    add_executable(linux_rt_example examples/linux_rt_example.cpp)
+    #    target_link_libraries(linux_rt_example PRIVATE pthread)`n#endif()
 
 # Link libraries
 if(NOT BUILD_WITHOUT_ADS)
     if(WIN32)
         target_link_libraries(ads-realtime-bridge
             PRIVATE
+            fmt::fmt
             ${ADS_LIBRARY}
             PahoMqttCpp::paho-mqttpp3
             ws2_32)  # Windows Sockets
@@ -119,6 +118,7 @@ if(NOT BUILD_WITHOUT_ADS)
         # Linux: ADS Library + pthread
         target_link_libraries(ads-realtime-bridge
             PRIVATE
+            fmt::fmt
             ${ADS_LIBRARY}
             PahoMqttCpp::paho-mqttpp3
             pthread)
@@ -128,11 +128,13 @@ else()
     if(WIN32)
         target_link_libraries(ads-realtime-bridge
             PRIVATE
+            fmt::fmt
             PahoMqttCpp::paho-mqttpp3
             ws2_32)
     else()
         target_link_libraries(ads-realtime-bridge
             PRIVATE
+            fmt::fmt
             PahoMqttCpp::paho-mqttpp3
             pthread)
     endif()
