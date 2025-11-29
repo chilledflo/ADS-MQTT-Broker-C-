@@ -51,17 +51,27 @@ int main(int argc, char* argv[]) {
     std::cout << "[CONFIG] Notification Cycle: " << config.notification_cycle_us << "µs\n";
     std::cout << "[CONFIG] Max Latency: " << config.max_latency_us << "µs (<1ms)\n\n";
 
-    // Thread-Priorität erhöhen
+#ifdef _WIN32
+    // Thread-Priorität erhöhen (nur Windows)
     SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
     SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
     std::cout << "[SYSTEM] Thread-Priorität: TIME_CRITICAL\n";
+#else
+    std::cout << "[SYSTEM] Thread-Priorität: Standard (Linux)\n";
+#endif
+#endif
 
-    // ADS Engine initialisieren
+#ifdef _WIN32
+    // ADS Engine initialisieren (nur Windows RTSS)
     AdsRealtimeEngine ads_engine(config);
     if (!ads_engine.connect()) {
         std::cerr << "[MAIN] FEHLER: ADS Verbindung fehlgeschlagen!\n";
         return 1;
     }
+#else
+    // Linux: Kein RTSS, verwende Standard-ADS
+    std::cout << "[MAIN] WARNUNG: Linux Build - RTSS nicht verfügbar\n";
+#endif
 
     // MQTT Publisher initialisieren
     MqttPublisher mqtt_publisher(config);
@@ -70,7 +80,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Variablen registrieren mit Realtime-Callbacks
+#ifdef _WIN32
+    // Variablen registrieren mit Realtime-Callbacks (nur Windows RTSS)
     std::cout << "\n[MAIN] Registriere Variablen...\n";
 
     // Beispiel: GVL.abc Variable
@@ -106,11 +117,15 @@ int main(int argc, char* argv[]) {
     ads_engine.start();
 
     std::cout << "\n[MAIN] ✅ System läuft - Hard Realtime Mode aktiv\n";
+#else
+    std::cout << "\n[MAIN] ✅ System läuft - Standard Mode (Linux)\n";
+#endif
     std::cout << "[MAIN] Garantierte Latenz: <1ms\n";
     std::cout << "[MAIN] Notification Rate: " << (1000000 / config.notification_cycle_us) << " Hz\n";
     std::cout << "[MAIN] Drücke Ctrl+C zum Beenden...\n\n";
 
-    // Performance Monitor Thread
+#ifdef _WIN32
+    // Performance Monitor Thread (nur Windows RTSS)
     std::thread monitor_thread([&ads_engine]() {
         while (g_running.load()) {
             std::this_thread::sleep_for(std::chrono::seconds(5));

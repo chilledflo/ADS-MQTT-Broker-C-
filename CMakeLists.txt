@@ -110,9 +110,9 @@ if(NOT BUILD_WITHOUT_ADS)
     if(WIN32)
         target_link_libraries(ads-realtime-bridge
             PRIVATE
-
                 ${ADS_LIBRARY}
             PahoMqttCpp::paho-mqttpp3
+            fmt::fmt
             ws2_32)  # Windows Sockets
     else()
         # Linux: ADS Library + pthread
