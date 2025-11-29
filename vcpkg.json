@@ -6,7 +6,6 @@
     "dependencies":  [
                          "paho-mqttpp3",
                          "nlohmann-json",
-                         "spdlog",
-                         "fmt"
+                         "spdlog"
                      ]
 }
