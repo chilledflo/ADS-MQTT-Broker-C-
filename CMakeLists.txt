@@ -114,7 +114,7 @@ if(NOT BUILD_WITHOUT_ADS)
             PRIVATE
             ${ADS_LIBRARY}
             PahoMqttCpp::paho-mqttpp3
-            ws2_32  # Windows Sockets)
+            ws2_32)  # Windows Sockets
     else()
         # Linux: ADS Library + pthread
         target_link_libraries(ads-realtime-bridge
